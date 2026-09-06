@@ -12,17 +12,7 @@ defaults:
     shell: bash -xeuo pipefail {0}
 
 jobs:
-  syntax:
-    runs-on: macos-26
-    steps:
-      - uses: actions/checkout@v4
-      - uses: Homebrew/actions/setup-homebrew@master
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - run: brew style "$GITHUB_WORKSPACE"
-      - run: brew audit --strict --online --formula "$GITHUB_WORKSPACE/Formula/ffmpeg-vc.rb"
-
-  install:
+  test:
     strategy:
       fail-fast: false
       matrix:
@@ -34,11 +24,22 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      # brew refuses to audit or install a formula outside a tap.
+      - name: Link checkout as a tap
+        run: |
+          dir="$(brew --repository)/Library/Taps/video-commander/homebrew-tap"
+          mkdir -p "$(dirname "$dir")"
+          rm -rf "$dir"
+          ln -s "$GITHUB_WORKSPACE" "$dir"
+
+      - run: brew style video-commander/tap
+      - run: brew audit --strict --online video-commander/tap/ffmpeg-vc
+
       # The formula deliberately conflicts with core ffmpeg.
       - run: brew uninstall --ignore-dependencies --force ffmpeg || true
 
-      - run: brew install --formula "$GITHUB_WORKSPACE/Formula/ffmpeg-vc.rb"
-      - run: brew test --formula "$GITHUB_WORKSPACE/Formula/ffmpeg-vc.rb"
+      - run: brew install video-commander/tap/ffmpeg-vc
+      - run: brew test video-commander/tap/ffmpeg-vc
 
       - name: Binary works and is portable
         run: |

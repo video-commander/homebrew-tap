@@ -22,9 +22,9 @@ class FfmpegVc < Formula
   conflicts_with "ffmpeg", because: "both install ffmpeg and ffprobe binaries"
 
   def install
-    root = Dir["macos-*"].first
-    bin.install Dir["#{root}/bin/*"]
-    pkgshare.install "#{root}/LICENSES", "#{root}/configure-flags.txt"
+    # Homebrew strips the archive's single top-level directory.
+    bin.install Dir["bin/*"]
+    pkgshare.install "LICENSES", "configure-flags.txt"
   end
 
   test do

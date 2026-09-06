@@ -1,0 +1,54 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
+jobs:
+  syntax:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Homebrew/actions/setup-homebrew@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - run: brew style "$GITHUB_WORKSPACE"
+      - run: brew audit --strict --online --formula "$GITHUB_WORKSPACE/Formula/ffmpeg-vc.rb"
+
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-26, macos-26-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Homebrew/actions/setup-homebrew@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # The formula deliberately conflicts with core ffmpeg.
+      - run: brew uninstall --ignore-dependencies --force ffmpeg || true
+
+      - run: brew install --formula "$GITHUB_WORKSPACE/Formula/ffmpeg-vc.rb"
+      - run: brew test --formula "$GITHUB_WORKSPACE/Formula/ffmpeg-vc.rb"
+
+      - name: Binary works and is portable
+        run: |
+          ffmpeg -hide_banner -version | head -1
+          ffprobe -hide_banner -version | head -1
+          ! otool -L "$(command -v ffmpeg)" | tail -n +2 | awk '{print $1}' \
+            | grep -vE '^(/System/|/usr/lib/)'
+
+      - name: License texts installed
+        run: |
+          share="$(brew --prefix ffmpeg-vc)/share/ffmpeg-vc"
+          test -f "$share/configure-flags.txt"
+          test "$(find "$share/LICENSES" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')" -eq 17

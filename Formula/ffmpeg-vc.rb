@@ -1,15 +1,15 @@
 class FfmpegVc < Formula
   desc "Portable static FFmpeg with x264, x265, SVT-AV1, dav1d, zimg and libass"
   homepage "https://github.com/video-commander/ffmpeg-builder"
-  version "9.0.1-1"
+  version "9.0.1-2"
   license "GPL-3.0-or-later"
 
   if Hardware::CPU.arm?
-    url "https://github.com/video-commander/ffmpeg-builder/releases/download/v9.0.1-1/ffmpeg-9.0.1-macos-arm64.zip"
-    sha256 "6d74d9970d22efc0542b38f2038b32b98af47b081d139575102cf5079d21ef6a"
+    url "https://github.com/video-commander/ffmpeg-builder/releases/download/v9.0.1-2/ffmpeg-9.0.1-macos-arm64.zip"
+    sha256 "49fce4f35a0c5907353e6323c24da23c118e0a35d90a0901163c5ac0ad786121"
   else
-    url "https://github.com/video-commander/ffmpeg-builder/releases/download/v9.0.1-1/ffmpeg-9.0.1-macos-x86_64.zip"
-    sha256 "d3f9e0cd116cb3c062179fc42e8fa1dc12998ef0f9efc2506895dab6fff236da"
+    url "https://github.com/video-commander/ffmpeg-builder/releases/download/v9.0.1-2/ffmpeg-9.0.1-macos-x86_64.zip"
+    sha256 "334e5e7430766bf84d544fa3075ceb0c43c4ad70c453b573dc102e224ffc338f"
   end
 
   livecheck do
